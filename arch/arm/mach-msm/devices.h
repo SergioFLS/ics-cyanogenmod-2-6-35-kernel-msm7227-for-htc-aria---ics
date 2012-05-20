@@ -124,5 +124,8 @@ extern int tp_type;
 #ifdef CONFIG_MSM_SSBI
 extern struct platform_device msm_device_ssbi_pmic;
 #endif
+#ifdef CONFIG_MACH_PHOTON
+extern struct platform_device acoustic_device;
+#endif
 
 #endif

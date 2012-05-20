@@ -80,6 +80,7 @@ void adsp_set_image(struct adsp_info *info, uint32_t image)
  * module_entries table.If module_id is available returns `0`.
  * If module_id is not available returns `-ENXIO`.
  */
+#if (!defined(CONFIG_MACH_PHOTON))
 static int32_t adsp_validate_module(uint32_t module_id)
 {
 	uint32_t	*ptr;
@@ -116,6 +117,9 @@ static int32_t adsp_validate_queue(uint32_t mod_id, unsigned q_idx,
 	pr_info("adsp: cmd_buf size is more than allowed size\n");
 	return -EINVAL;
 }
+#endif
+#else
+static inline int32_t adsp_validate_module(uint32_t module_id) { return 0; }
 #endif
 
 uint32_t adsp_get_module(struct adsp_info *info, uint32_t task)
@@ -223,6 +227,7 @@ static int adsp_rpc_init(struct msm_adsp_module *adsp_module)
  * Send RPC_ADSP_RTOS_CMD_GET_INIT_INFO cmd to ARM9 and get
  * queue offsets and module entries (init info) as part of the event.
  */
+#if (!defined(CONFIG_MACH_PHOTON))
 static void  msm_get_init_info(void)
 {
 	int rc;
@@ -255,13 +260,14 @@ static void  msm_get_init_info(void)
 	if (rc < 0)
 		pr_err("adsp: could not send RPC request: %d\n", rc);
 }
-
+#endif
 
 int msm_adsp_get(const char *name, struct msm_adsp_module **out,
 		 struct msm_adsp_ops *ops, void *driver_data)
 {
 	struct msm_adsp_module *module;
 	int rc = 0;
+#if (!defined(CONFIG_MACH_PHOTON))
 	static uint32_t init_info_cmd_sent;
 
 	if (!init_info_cmd_sent) {
@@ -276,7 +282,7 @@ int msm_adsp_get(const char *name, struct msm_adsp_module **out,
 		}
 		init_info_cmd_sent++;
 	}
-
+#endif
 	module = find_adsp_module_by_name(&adsp_info, name);
 	if (!module)
 		return -ENODEV;
@@ -416,7 +422,7 @@ int __msm_adsp_write(struct msm_adsp_module *module, unsigned dsp_queue_addr,
 			module->name, module->id);
 		return -ENXIO;
 	}
-#if defined(CONFIG_ARCH_MSM7227)
+#if defined(CONFIG_ARCH_MSM7227) && (!defined(CONFIG_MACH_PHOTON))
 	if (dsp_queue_addr >= QDSP_MAX_NUM_QUEUES) {
 		pr_info("adsp: Invalid Queue Index: %d\n", dsp_queue_addr);
 		return -ENXIO;
@@ -757,7 +763,7 @@ static int handle_adsp_rtos_mtoa(struct rpc_request_hdr *req)
 					     req->xid,
 					     RPC_ACCEPTSTAT_SUCCESS);
 		break;
-#if defined(CONFIG_ARCH_MSM7227)
+#if defined(CONFIG_ARCH_MSM7227) && (!defined(CONFIG_MACH_PHOTON))
 	case RPC_ADSP_RTOS_MODEM_TO_APP_INIT_INFO_PROC:
 	case RPC_ADSP_RTOS_MODEM_TO_APP_EVENT_INFO_PROC:
 #else

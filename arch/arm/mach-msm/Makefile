@@ -103,7 +103,11 @@ obj-$(CONFIG_MSM_SMD) += smem_log.o socinfo.o
 obj-$(CONFIG_MSM_SMD) += last_radio_log.o
 obj-$(CONFIG_MSM_ONCRPCROUTER) += smd_rpcrouter_device.o
 ifndef CONFIG_ARCH_MSM7X30
+ifdef CONFIG_MACH_PHOTON
+obj-$(CONFIG_MSM_ONCRPCROUTER) += smd_rpcrouter_photon.o
+else
 obj-$(CONFIG_MSM_ONCRPCROUTER) += smd_rpcrouter.o
+endif
 obj-$(CONFIG_MSM_ONCRPCROUTER) += smd_rpcrouter_servers.o
 else
 obj-$(CONFIG_MSM_ONCRPCROUTER) += smd_rpcrouter-7x30.o
@@ -112,7 +116,11 @@ endif
 obj-$(CONFIG_MSM_ONCRPCROUTER) += smd_rpcrouter_xdr.o
 obj-$(CONFIG_MSM_RPCSERVERS) += rpc_server_dog_keepalive.o
 obj-$(CONFIG_MSM_RPCSERVERS) += rpc_server_time_remote.o
+ifdef CONFIG_MACH_PHOTON
+obj-$(CONFIG_MSM_SMD) += smd_tty_photon.o smd_qmi.o
+else
 obj-$(CONFIG_MSM_SMD) += smd_tty.o smd_qmi.o
+endif
 else
 obj-$(CONFIG_QCT_LTE) += lte/
 endif
@@ -146,7 +154,11 @@ endif
 obj-$(CONFIG_CPU_FREQ) += cpufreq.o
 
 ifndef CONFIG_ARCH_MSM8X60
+ifdef CONFIG_MACH_PHOTON
+obj-$(CONFIG_HTC_ACOUSTIC) += htc_acoustic_wince.o
+else
 obj-$(CONFIG_HTC_ACOUSTIC) += htc_acoustic.o
+endif
 endif
 
 obj-$(CONFIG_HTC_ACOUSTIC_QSD) += htc_acoustic_qsd.o
@@ -328,6 +340,12 @@ obj-$(CONFIG_MACH_LATTE) += board-latte-mmc.o board-latte-wifi.o board-latte-mic
 obj-$(CONFIG_MACH_LIBERTY) += board-liberty-rfkill.o htc_bluetooth.o
 obj-$(CONFIG_MACH_LIBERTY) += board-liberty.o board-liberty-keypad.o board-liberty-panel.o
 obj-$(CONFIG_MACH_LIBERTY) += board-liberty-mmc.o board-liberty-wifi.o board-liberty-microp.o
+
+obj-$(CONFIG_HTC_FB_CONSOLE_ONBOOT) += htc_fb_console.o fonts.o font_pearl_8x8.o
+obj-$(CONFIG_MACH_PHOTON) += dmesg_log.o
+obj-$(CONFIG_MACH_PHOTON) += board-photon-rfkill.o htc_bluetooth.o
+obj-$(CONFIG_MACH_PHOTON) += board-photon.o board-photon-keypad.o board-photon-panel.o
+obj-$(CONFIG_MACH_PHOTON) += board-photon-mmc.o board-photon-wifi.o board-photon-microp.o
 obj-$(CONFIG_MACH_MARVEL) += board-marvel-rfkill.o htc_bluetooth.o
 obj-$(CONFIG_MACH_MARVEL) += board-marvel.o board-marvel-keypad.o board-marvel-panel.o
 obj-$(CONFIG_MACH_MARVEL) += board-marvel-mmc.o board-marvel-wifi.o board-marvel-microp.o
@@ -410,7 +428,11 @@ obj-$(CONFIG_ARCH_MSM_FLASHLIGHT) += msm_flashlight.o
 
 obj-$(CONFIG_TROUT_BATTCHG_DOCK) += htc_one_wire.o
 obj-$(CONFIG_TROUT_BATTCHG) += htc_battery_trout.o
+ifdef CONFIG_MACH_PHOTON
+obj-$(CONFIG_HTC_BATTCHG) += htc_battery_smem.o proc_comm_wince.o
+else
 obj-$(CONFIG_HTC_BATTCHG) += htc_battery.o
+endif
 obj-$(CONFIG_HTC_BATT_CORE) += htc_battery_core.o
 obj-$(CONFIG_HTC_BATT8x60) += htc_battery_8x60.o
 obj-$(CONFIG_HTC_PWRSINK) += htc_pwrsink.o

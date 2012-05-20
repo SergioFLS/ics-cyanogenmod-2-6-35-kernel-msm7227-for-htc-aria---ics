@@ -47,6 +47,12 @@
 #define MSM_GPIO2_PHYS        0xA9300000
 #define MSM_GPIO2_SIZE        SZ_4K
 
+#if defined(CONFIG_MACH_PHOTON)
+#define MSM_GPIO2E_BASE        IOMEM(0xF8010000)
+#define MSM_GPIO2E_PHYS        0xA9100000
+#define MSM_GPIO2E_SIZE        SZ_4K
+#endif
+
 #define MSM_CLK_CTL_BASE      IOMEM(0xF8005000)
 #define MSM_CLK_CTL_PHYS      0xA8600000
 #define MSM_CLK_CTL_SIZE      SZ_4K
@@ -56,7 +62,9 @@
 #define MSM_CLK_CTL_SH2_SIZE  SZ_4K
 
 #define MSM_SHARED_RAM_BASE   IOMEM(0xF8100000)
-#if defined(CONFIG_ARCH_MSM7227)
+#if defined(CONFIG_ARCH_MSM7227) && (defined(CONFIG_MACH_PHOTON))
+#define MSM_SHARED_RAM_PHYS   0x0FF00000
+#elif defined(CONFIG_ARCH_MSM7227) && (!defined(CONFIG_MACH_PHOTON))
 #define MSM_SHARED_RAM_PHYS   0x00100000
 #elif defined(CONFIG_ARCH_MSM7225)
 #define MSM_SHARED_RAM_PHYS   0x00800000
@@ -108,6 +116,9 @@
 #define MSM_EMDH_PHYS         0xAA700000
 #define MSM_EMDH_SIZE         SZ_4K
 
+//#if defined(CONFIG_MACH_PHOTON)
+#define MSM_MDP_BASE          IOMEM(0xF9200000)
+//#endif
 #define MSM_MDP_PHYS          0xAA200000
 #define MSM_MDP_SIZE          0x000F0000
 
@@ -119,7 +130,11 @@
 #define MSM_AD5_PHYS          0xAC000000
 #define MSM_AD5_SIZE          (SZ_1M*13)
 
+#if defined(CONFIG_MACH_PHOTON)
+#define MSM_VFE_PHYS          0xA0D00000
+#else
 #define MSM_VFE_PHYS          0xA0F00000
+#endif
 #define MSM_VFE_SIZE          SZ_1M
 
 #define MSM_UART1DM_PHYS      0xA0200000
@@ -154,6 +169,12 @@
 
 #ifdef CONFIG_BUILD_CIQ
 #define SMD_CIQ_BASE		0xFC11C
+#endif
+
+#if defined(CONFIG_MACH_PHOTON)
+#define MSM_RAMCONSOLE_BASE IOMEM(0xF9100000)
+#define MSM_RAMCONSOLE_PHYS 0x27f1b000
+#define MSM_RAMCONSOLE_SIZE 0x0001f400
 #endif
 
 #endif

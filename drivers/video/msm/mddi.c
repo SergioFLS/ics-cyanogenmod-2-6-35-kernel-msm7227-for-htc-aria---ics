@@ -104,6 +104,7 @@ struct mddi_info {
 	char client_name[20];
 
 	struct platform_device client_pdev;
+	struct resource client_vsync_res;
 	unsigned type;
 	char debugfs_buf[32];
 };
@@ -1100,7 +1101,14 @@ dummy_client:
 		ret = -EINVAL;
 		goto error_mddi_interface;
 	}
-
+if (pdata->vsync_irq) {
+		mddi->client_vsync_res.start = pdata->vsync_irq;
+		mddi->client_vsync_res.end = pdata->vsync_irq;
+		mddi->client_vsync_res.flags = IORESOURCE_IRQ;
+		mddi->client_vsync_res.name = "vsync";
+		mddi->client_pdev.resource = &mddi->client_vsync_res;
+		mddi->client_pdev.num_resources = 1;
+		}
 	mddi->client_pdev.dev.platform_data = &mddi->client_data;
 	PR_DISP_INFO("mddi: publish: %s\n", mddi->client_name);
 	platform_device_register(&mddi->client_pdev);

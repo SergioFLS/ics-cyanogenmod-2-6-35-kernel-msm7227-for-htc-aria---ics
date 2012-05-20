@@ -124,7 +124,25 @@
 #define PM_LIBVERS                             0x10001
 #define HTC_PROCEDURE_SET_VIB_ON_OFF           22
 
-#elif (CONFIG_MSM_AMSS_VERSION == 4735)
+#elif (CONFIG_MSM_AMSS_VERSION == 4735) && (defined(CONFIG_MACH_PHOTON))
+#define INT_ADSP                               INT_ADSP_A9_A11
+#define ADSP_DRIVER_NAME                       "rs3000000a:00000000"
+#define RPC_ADSP_RTOS_ATOM_VERS                0x00000
+#define RPC_ADSP_RTOS_MTOA_VERS                0x00000
+#define AUDMGR_VERS                            0x30001
+#define AUDMGR_CB_VERS                         0x30001
+#define DOG_KEEPALIVE_VERS                     0x10001
+#define RPC_DOG_KEEPALIVE_BEACON               2
+#define TIME_REMOTE_MTOA_VERS                  0x10002
+#define RPC_SND_VERS                           0x20002
+#define RPC_SND_CB_VERS                        0x20002
+#define VOCPCM_REGISTER_PCM_INPUT_CLIENT_PROC  24
+#define VOCPCM_REGISTER_PCM_OUTPUT_CLIENT_PROC 25
+#define APP_TIMEREMOTE_PDEV_NAME               "rs30000048:00010004"
+#define PM_LIBVERS                             0x10001
+#define HTC_PROCEDURE_SET_VIB_ON_OFF           22
+
+#elif (CONFIG_MSM_AMSS_VERSION == 4735) && (!defined(CONFIG_MACH_PHOTON))
 #define INT_ADSP                               INT_ADSP_A9_A11
 #define ADSP_DRIVER_NAME                       "rs3000000a:00010001"
 #define RPC_ADSP_RTOS_ATOM_VERS                0x10001

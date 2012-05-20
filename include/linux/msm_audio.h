@@ -329,6 +329,9 @@ struct msm_snd_device_config {
 #define SND_SET_DEVICE _IOW(SND_IOCTL_MAGIC, 2, struct msm_device_config *)
 
 #define SND_METHOD_VOICE 0
+#ifdef CONFIG_MACH_PHOTON
+#define SND_METHOD_AUDIO 1
+#endif
 
 struct msm_snd_volume_config {
 	uint32_t device;

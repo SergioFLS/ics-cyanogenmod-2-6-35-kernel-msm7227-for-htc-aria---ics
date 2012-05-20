@@ -119,8 +119,13 @@ struct adsp_info {
 #define RPC_ADSP_RTOS_MTOA_PROG 0x3000000b
 #define RPC_ADSP_RTOS_ATOM_NULL_PROC 0
 #define RPC_ADSP_RTOS_MTOA_NULL_PROC 0
+#if defined(CONFIG_MACH_PHOTON)
+#define RPC_ADSP_RTOS_APP_TO_MODEM_PROC 1
+#define RPC_ADSP_RTOS_MODEM_TO_APP_PROC 1
+#else
 #define RPC_ADSP_RTOS_APP_TO_MODEM_PROC 2
 #define RPC_ADSP_RTOS_MODEM_TO_APP_PROC 2
+#endif
 #define RPC_ADSP_RTOS_MODEM_TO_APP_EVENT_INFO_PROC 3
 #define RPC_ADSP_RTOS_MODEM_TO_APP_INIT_INFO_PROC 4
 
@@ -288,6 +293,7 @@ extern int adsp_init_info(struct adsp_info *info);
 /* Value to indicate that a queue is not defined for a particular image */
 #define QDSP_RTOS_NO_QUEUE  0xfffffffe
 
+#if (!defined(CONFIG_MACH_PHOTON))
 /* Firmware modules */
 #define QDSP_MODULE_KERNEL                  0x0106dd4e
 #define QDSP_MODULE_AFETASK                 0x0106dd6f
@@ -338,8 +344,8 @@ extern int adsp_init_info(struct adsp_info *info);
 #define QDSP_MODULE_MAX                     0x7fffffff
 
 /* DO NOT USE: Force this enum to be a 32bit type to improve speed */
-#define	QDSP_MODULE_32BIT_DUMMY		0x10000
-
+#define        QDSP_MODULE_32BIT_DUMMY         0x10000
+#endif
 
 /*
  * Constants used to communicate with the ADSP RTOS

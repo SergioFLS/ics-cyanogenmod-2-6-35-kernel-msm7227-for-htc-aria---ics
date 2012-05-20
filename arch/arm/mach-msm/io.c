@@ -102,6 +102,9 @@ static struct map_desc msm_io_desc[] __initdata = {
 	MSM_DEVICE(DMOV),
 	MSM_DEVICE(GPIO1),
 	MSM_DEVICE(GPIO2),
+#if defined(CONFIG_MACH_PHOTON)
+	MSM_DEVICE(GPIO2E),
+#endif
 	MSM_DEVICE(CLK_CTL),
 #ifdef CONFIG_ARCH_MSM7X30
 	MSM_DEVICE(CLK_CTL_SH2),
@@ -115,6 +118,9 @@ static struct map_desc msm_io_desc[] __initdata = {
 #endif
 	MSM_DEVICE(AD5),
 	MSM_DEVICE(MDC),
+//#if defined(CONFIG_MACH_PHOTON) //this working on aria and need for fb console on boot :)
+	MSM_DEVICE(MDP),
+//#endif
 #ifdef CONFIG_ARCH_MSM7X30
 	MSM_DEVICE(ACC),
 	MSM_DEVICE(SAW),
@@ -141,6 +147,14 @@ static struct map_desc msm_io_desc[] __initdata = {
 		.length =   MSM_SHARED_RAM_SIZE,
 		.type =     MT_DEVICE,
 	},
+#if defined(CONFIG_MACH_PHOTON)
+	{
+		.virtual =  (unsigned long) MSM_RAMCONSOLE_BASE,
+		.pfn =      __phys_to_pfn(MSM_RAMCONSOLE_PHYS),
+		.length =   MSM_RAMCONSOLE_SIZE,
+		.type =     MT_DEVICE,
+	},
+#endif
 	MSM_DEVICE(SDC2),
 };
 

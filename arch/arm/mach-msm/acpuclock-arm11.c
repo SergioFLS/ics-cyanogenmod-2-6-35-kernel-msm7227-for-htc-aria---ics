@@ -197,8 +197,7 @@ static struct cpufreq_frequency_table msm7227_freq_table[] = {
 /*	{ 10, 825600 },
 	{ 11, 844800 },
 	{ 12, 864000 },
-*/
-	{ 10, CPUFREQ_TABLE_END },
+*/	{ 10, CPUFREQ_TABLE_END },
 };
 
 static struct cpufreq_frequency_table msm72xx_freq_table[] = {
@@ -248,6 +247,7 @@ static struct freq_tbl_map acpu_freq_tbl_list[] = {
 	TABLE_CONFIG(LEGEND, 7227),
 	TABLE_CONFIG(LATTE, 7227),
 	TABLE_CONFIG(LIBERTY, 7227),
+	TABLE_CONFIG(PHOTON, 7227),
 	TABLE_CONFIG(MARVEL, 7227),
 	TABLE_CONFIG(MARVELC, 7227),
 	TABLE_CONFIG(MARVELCT, 7227),

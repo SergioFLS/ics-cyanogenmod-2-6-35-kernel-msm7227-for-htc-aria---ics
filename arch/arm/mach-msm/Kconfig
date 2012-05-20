@@ -29,6 +29,7 @@ config ARCH_QSD8X50
 	select ARCH_MSM_SCORPION
 	select CPU_V7
 	select VERIFY_PERMISSION_FAULT
+
 config ARCH_MSM8X60
 	bool "MSM8X60"
 	select ARCH_MSM_SCORPIONMP
@@ -410,6 +411,20 @@ config MACH_LIBERTY
 	bool "Liberty"
 	help
 	  Support for Liberty (PDA phone).
+
+config MACH_PHOTON
+	depends on ARCH_MSM7227
+	default n
+	bool "Photon"
+	help
+	  Support for Photon (PDA phone).
+
+config HTC_FB_CONSOLE_ONBOOT
+	depends on (MACH_PHOTON || MACH_LIBERTY)
+	default n
+	bool "FB Console on screen during boot for HTC Liberty or HTC HD Mini"
+	help
+	  Enables a FB Console at bootup.
 
 config MACH_MARVEL
 	depends on ARCH_MSM7227
@@ -1364,11 +1379,11 @@ config MSM_ADSP_COMP
 endif
 
 config HTC_ACOUSTIC
-        tristate "HTC acoustic driver"
-        default y
-        help
-          The driver provide user space use shared memory allocate by using
-          RPC code.
+	tristate "HTC acoustic driver"
+	default y
+	help
+	  The driver provide user space use shared memory allocate by using
+	  RPC code.
 
 config HTC_ACOUSTIC_QSD
 	tristate "HTC acoustic driver for QSD"

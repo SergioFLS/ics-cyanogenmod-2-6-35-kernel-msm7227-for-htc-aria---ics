@@ -62,7 +62,8 @@ enum {
 	MSM_PM_DEBUG_CLOCK_VOTE = 1U << 7,
 	MSM_PM_DEBUG_WAKEUP_REASON = 1U << 8,
 };
-static int msm_pm_debug_mask = MSM_PM_DEBUG_CLOCK_VOTE | MSM_PM_DEBUG_WAKEUP_REASON;
+static int msm_pm_debug_mask = /*MSM_PM_DEBUG_SUSPEND | MSM_PM_DEBUG_CLOCK | */
+					MSM_PM_DEBUG_CLOCK_VOTE | MSM_PM_DEBUG_WAKEUP_REASON;
 module_param_named(debug_mask, msm_pm_debug_mask, int, S_IRUGO | S_IWUSR | S_IWGRP);
 
 static int msm_pm_sleep_mode = CONFIG_MSM7X00A_SLEEP_MODE;
@@ -174,13 +175,13 @@ static struct msm_pm_platform_data msm_pm_mode_default[MSM_PM_SLEEP_MODE_NR] = {
 	[MSM_PM_SLEEP_MODE_POWER_COLLAPSE].idle_enabled = 1,
 	[MSM_PM_SLEEP_MODE_POWER_COLLAPSE].latency = 8594,
 	[MSM_PM_SLEEP_MODE_POWER_COLLAPSE].residency = 23740,
-	/*
+
 	[MSM_PM_SLEEP_MODE_APPS_SLEEP].supported = 1,
 	[MSM_PM_SLEEP_MODE_APPS_SLEEP].suspend_enabled = 1,
 	[MSM_PM_SLEEP_MODE_APPS_SLEEP].idle_enabled = 1,
 	[MSM_PM_SLEEP_MODE_APPS_SLEEP].latency = 8594,
 	[MSM_PM_SLEEP_MODE_APPS_SLEEP].residency = 23740,
-
+	/*
 	[MSM_PM_SLEEP_MODE_POWER_COLLAPSE_STANDALONE].supported = 1,
 	[MSM_PM_SLEEP_MODE_POWER_COLLAPSE_STANDALONE].suspend_enabled = 0,
 	[MSM_PM_SLEEP_MODE_POWER_COLLAPSE_STANDALONE].idle_enabled = 0,
@@ -188,8 +189,7 @@ static struct msm_pm_platform_data msm_pm_mode_default[MSM_PM_SLEEP_MODE_NR] = {
 	[MSM_PM_SLEEP_MODE_POWER_COLLAPSE_STANDALONE].residency = 6000,
 	*/
 	[MSM_PM_SLEEP_MODE_RAMP_DOWN_AND_WAIT_FOR_INTERRUPT].supported = 1,
-	[MSM_PM_SLEEP_MODE_RAMP_DOWN_AND_WAIT_FOR_INTERRUPT].suspend_enabled
-		= 1,
+	[MSM_PM_SLEEP_MODE_RAMP_DOWN_AND_WAIT_FOR_INTERRUPT].suspend_enabled = 1,
 	[MSM_PM_SLEEP_MODE_RAMP_DOWN_AND_WAIT_FOR_INTERRUPT].idle_enabled = 0,
 	[MSM_PM_SLEEP_MODE_RAMP_DOWN_AND_WAIT_FOR_INTERRUPT].latency = 443,
 	[MSM_PM_SLEEP_MODE_RAMP_DOWN_AND_WAIT_FOR_INTERRUPT].residency = 1098,
@@ -273,9 +273,9 @@ msm_pm_wait_state(uint32_t wait_all_set, uint32_t wait_all_clear,
 		state = smsm_get_state(PM_SMSM_READ_STATE);
 #if DRAINFIX
 		if (((state & wait_all_set) == wait_all_set) &&
-			((~state & wait_all_clear) == wait_all_clear) &&
-			(wait_any_set == 0 || (state & wait_any_set) ||
-			wait_any_clear == 0 || (state & wait_any_clear)))
+		 ((~state & wait_all_clear) == wait_all_clear) &&
+		 (wait_any_set == 0 || (state & wait_any_set) ||
+		 wait_any_clear == 0 || (state & wait_any_clear)))
 			return 0;
 #else
 		if (((wait_all_set || wait_all_clear) && 
@@ -310,20 +310,21 @@ static DECLARE_DELAYED_WORK(work_expire_boot_lock, do_expire_boot_lock);
 static void
 msm_pm_enter_prep_hw(void)
 {
+#if defined(CONFIG_ARCH_MSM7X30)
+	writel(1, A11S_PWRDOWN);
+	writel(4, A11S_SECOP);
+#elif defined(CONFIG_ARCH_MSM7X27)
 #if DRAINFIX
 	writel(0x7f, A11S_CLK_SLEEP_EN); // halt all clocks
 	writel(1, A11S_PWRDOWN); // power down and wait for interrupt
 	writel(0x08, A11S_STANDBY_CTL); // hw control back bias on, wait 0 clks after interrupt
 	writel(0, A11RAMBACKBIAS);
 	return;
-#endif
-#if defined(CONFIG_ARCH_MSM7X30)
-	writel(1, A11S_PWRDOWN);
-	writel(4, A11S_SECOP);
-#elif defined(CONFIG_ARCH_MSM7X27)
+#else
 	writel(0x1f, A11S_CLK_SLEEP_EN);
 	writel(1, A11S_PWRDOWN);
 	writel(0, A11S_STANDBY_CTL);
+#endif
 #elif defined(CONFIG_ARCH_QSD8X50)
 	writel(0x1f, A11S_CLK_SLEEP_EN);
 	writel(1, A11S_PWRDOWN);
@@ -850,8 +851,27 @@ static struct platform_suspend_ops msm_pm_ops = {
 	.valid		= suspend_valid_only_mem,
 };
 
-static uint32_t restart_reason = 0x776655AA;
+#if defined(CONFIG_MACH_PHOTON)
+enum msm_reboot_reason {
+	MSM_BOOTLOADER = 0x77665500,
+	MSM_RECOVERY = 0x77665502,
+	MSM_ERASEFLASH = 0x776655EF,
+	MSM_OEM = 0x6f656d00,
+	MSM_FORCE_HARD = 0x776655AA,
+	MSM_DEFAULT = 0x77665501
+};
 
+enum msm_wince_lk_reboot_reason {
+	MSM_LK_FASTBOOT = 0x46414254,
+	MSM_LK_RECOVERY = 0x52435652,
+	MSM_LK_TAG = 0x504f4f50
+};
+
+#define MSM_WINCE_LK_BOOT_ADDR 0x8dfff0
+static uint32_t restart_reason = MSM_FORCE_HARD;
+#else
+static uint32_t restart_reason = 0x776655AA;
+#endif
 static int msm_wakeup_after;	/* default, no wakeup by alarm */
 static int msm_power_wakeup_after(const char *val, struct kernel_param *kp)
 {
@@ -939,6 +959,37 @@ void msm_pm_flush_console(void)
 	release_console_sem();
 }
 
+#if defined(CONFIG_MACH_PHOTON)
+static void msm_pm_restart(char str, const char *cmd)
+{
+	volatile void *reset_tag;
+	volatile void *reset_off;
+	msm_pm_flush_console();
+
+	switch(restart_reason) {
+		case MSM_RECOVERY:
+			restart_reason = MSM_LK_RECOVERY;
+			break;
+		case MSM_BOOTLOADER:
+			restart_reason = MSM_LK_FASTBOOT;
+			break;
+		default:
+			restart_reason = 0;
+	};
+	reset_tag = ioremap(MSM_WINCE_LK_BOOT_ADDR & ~(PAGE_SIZE - 1), PAGE_SIZE);
+	if (reset_tag) {
+		reset_off = reset_tag + (MSM_WINCE_LK_BOOT_ADDR & (PAGE_SIZE - 1));
+		writel(restart_reason, reset_off);
+		writel(restart_reason ^ MSM_LK_TAG, reset_off + 4);
+		iounmap(reset_tag);
+	}
+	if (msm_hw_reset_hook)
+		msm_hw_reset_hook();
+
+	mdelay(50);
+	for (;;);
+}
+#else
 static void msm_pm_restart(char str, const char *cmd)
 {
 	msm_pm_flush_console();
@@ -968,11 +1019,28 @@ static void msm_pm_restart(char str, const char *cmd)
 
 	for (;;) ;
 }
+#endif
 
 static int msm_reboot_call(struct notifier_block *this, unsigned long code, void *_cmd)
 {
 	if((code == SYS_RESTART) && _cmd) {
 		char *cmd = _cmd;
+#if defined(CONFIG_MACH_PHOTON)
+		if (!strcmp(cmd, "bootloader")) {
+			restart_reason = MSM_BOOTLOADER;
+		} else if (!strcmp(cmd, "recovery")) {
+			restart_reason = MSM_RECOVERY;
+		} else if (!strcmp(cmd, "eraseflash")) {
+			restart_reason = MSM_ERASEFLASH;
+		} else if (!strncmp(cmd, "oem-", 4)) {
+			unsigned code = simple_strtoul(cmd + 4, 0, 16) & 0xff;
+			restart_reason = MSM_OEM | code;
+		} else if (!strcmp(cmd, "force-hard")) {
+			restart_reason = MSM_FORCE_HARD;
+		} else {
+			restart_reason = MSM_DEFAULT;
+		}
+#else
 		if (!strcmp(cmd, "bootloader")) {
 			restart_reason = 0x77665500;
 		} else if (!strcmp(cmd, "recovery")) {
@@ -987,6 +1055,7 @@ static int msm_reboot_call(struct notifier_block *this, unsigned long code, void
 		} else {
 			restart_reason = 0x77665501;
 		}
+#endif
 	}
 	return NOTIFY_DONE;
 }
