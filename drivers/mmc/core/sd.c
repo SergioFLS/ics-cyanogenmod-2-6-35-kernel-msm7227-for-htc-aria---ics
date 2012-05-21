@@ -230,7 +230,7 @@ static int mmc_read_switch(struct mmc_card *card)
 	}
 
 	if (status[13] & 0x02)
-#id defined(CONFIG_MACH_PHOTON)
+#if defined(CONFIG_MACH_PHOTON)
 		card->sw_caps.hs_max_dtr = 49152000;
 #else
 		card->sw_caps.hs_max_dtr = 50000000;
