@@ -12,8 +12,11 @@
 /*
  * Clock rates
  */
-
+#if defined(CONFIG_MACH_PHOTON)
+#define MVSD_CLOCKRATE_MAX			49152000
+#else
 #define MVSD_CLOCKRATE_MAX			50000000
+#endif
 #define MVSD_BASE_DIV_MAX			0x7ff
 
 
