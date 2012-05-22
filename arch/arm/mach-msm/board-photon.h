@@ -35,19 +35,21 @@
 #define MSM_PHOTON_LINUX2_SIZE          (MSM_MEM2_SIZE - MSM_MM_HEAP_SIZE)
 
 #define MSM_GPU_MEM_BASE        0x25800000
-#define MSM_GPU_MEM_SIZE        0x00300000
+#define MSM_GPU_MEM_SIZE        0x00800000
 
-#define MSM_PMEM_MDP_BASE       0x25B00000
+#define MSM_PMEM_MDP_BASE       0x26000000
 #define MSM_PMEM_MDP_SIZE       0x00E00000
 
-#define MSM_FB_BASE             0x26900000
+#define MSM_FB_BASE             0x26E00000
 #define MSM_FB_SIZE             0x00200000
 
-#define MSM_PMEM_ADSP_BASE      0x26B00000
-#define MSM_PMEM_ADSP_SIZE      0x00C1B000
+#define MSM_PMEM_ADSP_BASE      0x27000000
+#define MSM_PMEM_ADSP_SIZE      0x00F1B000
 
+/* this is not needed on cm9!
 #define MSM_PMEM_CAMERA_BASE    0x2771B000
 #define MSM_PMEM_CAMERA_SIZE    0x00800000
+*/
 
 #define MSM_RAM_CONSOLE_BASE    0x27F1B000
 #define MSM_RAM_CONSOLE_SIZE    0x0001F400
