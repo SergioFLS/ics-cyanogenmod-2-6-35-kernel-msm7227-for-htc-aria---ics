@@ -79,7 +79,7 @@ struct fb_para {
 struct fb_para photon_para = {
  	.htc_fb_lcd_width 	= 320,
 	.htc_fb_lcd_height 	= 480,
-	.htc_fb_phys 	 	= 0x26900000,
+	.htc_fb_phys 	 	= 0x26e00000,
 	.htc_fb_off 	 	= 0x00000000,
 	.htc_fb_size 	 	= 0x00200000,
 	.htc_fb_con_max_rows 	= 80,
