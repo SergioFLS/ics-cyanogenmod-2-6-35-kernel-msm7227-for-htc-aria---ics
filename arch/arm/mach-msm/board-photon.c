@@ -680,7 +680,7 @@ MODULE_PARM_DESC(bdaddr, "bluetooth address");
 
 #elif defined(CONFIG_SERIAL_MSM_HS)
 static struct msm_serial_hs_platform_data msm_uart_dm1_pdata = {
-	.rx_wakeup_irq = MSM_GPIO_TO_INT(PHOTON_GPIO_BT_HOST_WAKE),
+	.wakeup_irq = MSM_GPIO_TO_INT(PHOTON_GPIO_BT_HOST_WAKE),
 	.inject_rx_on_wakeup = 0,
 	.cpu_lock_supported = 1,
 
@@ -825,7 +825,7 @@ void config_photon_proximity_gpios(int on)
 
 #ifndef CONFIG_SERIAL_MSM_HS_PURE_ANDROID
 /* for bcm */
-static char bdaddr[20];
+static char bdaddress[20];
 extern unsigned char *get_bt_bd_ram(void);
 
 static void bt_export_bd_address(void)
@@ -833,13 +833,13 @@ static void bt_export_bd_address(void)
 	unsigned char cTemp[6];
 
 	memcpy(cTemp, get_bt_bd_ram(), 6);
-	sprintf(bdaddr, "%02x:%02x:%02x:%02x:%02x:%02x",
+	sprintf(bdaddress, "%02x:%02x:%02x:%02x:%02x:%02x",
 		cTemp[0], cTemp[1], cTemp[2], cTemp[3], cTemp[4], cTemp[5]);
-	printk(KERN_INFO "YoYo--BD_ADDRESS=%s\n", bdaddr);
+	printk(KERN_INFO "YoYo--BD_ADDRESS=%s\n", bdaddress);
 }
 
-module_param_string(bdaddr, bdaddr, sizeof(bdaddr), S_IWUSR | S_IRUGO);
-MODULE_PARM_DESC(bdaddr, "BT MAC ADDRESS");
+module_param_string(bdaddress, bdaddress, sizeof(bdaddress), S_IWUSR | S_IRUGO);
+MODULE_PARM_DESC(bdaddress, "BT MAC ADDRESS");
 #endif
 
 static uint32_t photon_serial_debug_table[] = {
@@ -866,8 +866,8 @@ static struct msm_acpu_clock_platform_data photon_clock_data = {
 	.acpu_switch_time_us = 50,
 	.max_speed_delta_khz = 256000,
 	.vdd_switch_time_us = 62,
-	.power_collapse_khz = 128000,
-	.wait_for_irq_khz = 128000,
+	.power_collapse_khz = 19200,
+	.wait_for_irq_khz = 200000,
 };
 
 static unsigned photon_perf_acpu_table[] = {
