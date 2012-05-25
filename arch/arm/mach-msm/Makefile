@@ -346,6 +346,7 @@ obj-$(CONFIG_MACH_PHOTON) += dmesg_log.o
 obj-$(CONFIG_MACH_PHOTON) += board-photon-rfkill.o htc_bluetooth.o
 obj-$(CONFIG_MACH_PHOTON) += board-photon.o board-photon-keypad.o board-photon-panel.o
 obj-$(CONFIG_MACH_PHOTON) += board-photon-mmc.o board-photon-wifi.o board-photon-microp.o
+obj-$(CONFIG_MACH_PHOTON) += htc_wifi_nvs_photon.o
 obj-$(CONFIG_MACH_MARVEL) += board-marvel-rfkill.o htc_bluetooth.o
 obj-$(CONFIG_MACH_MARVEL) += board-marvel.o board-marvel-keypad.o board-marvel-panel.o
 obj-$(CONFIG_MACH_MARVEL) += board-marvel-mmc.o board-marvel-wifi.o board-marvel-microp.o
@@ -420,7 +421,10 @@ obj-$(CONFIG_MACH_HOLIDAY) += board-holiday-mmc.o board-holiday-wifi.o
 
 obj-$(CONFIG_ARCH_MSM7X00A) += msm_vibrator.o devices_htc.o
 obj-$(CONFIG_ARCH_MSM7225) += msm_vibrator.o devices_htc.o htc_wifi_nvs.o htc_awb_cal.o htc_bluetooth.o
-obj-$(CONFIG_ARCH_MSM7227) += msm_vibrator.o devices_htc.o htc_wifi_nvs.o htc_awb_cal.o
+obj-$(CONFIG_ARCH_MSM7227) += msm_vibrator.o devices_htc.o htc_awb_cal.o
+ifndef CONFIG_MACH_PHOTON
+obj-$(CONFIG_ARCH_MSM7227) += htc_wifi_nvs.o
+endif
 obj-$(CONFIG_ARCH_QSD8X50) += msm_vibrator.o devices_htc.o
 obj-$(CONFIG_ARCH_MSM7X30) += msm_vibrator.o devices_htc.o
 obj-$(CONFIG_ARCH_MSM8X60) += devices_htc.o htc_wifi_nvs.o htc_awb_cal.o
