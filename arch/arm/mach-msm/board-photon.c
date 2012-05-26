@@ -667,13 +667,26 @@ extern unsigned char *get_bt_bd_ram(void);
 
 static void bt_export_bd_address(void)
 {
+	int i;
+	uint8_t id[16];
+	for (i=0; i<16; i++)
+		id[i] = readb(MSM_SHARED_RAM_BASE + 0xfc060 + i);
+	sprintf(bdaddr, "00:90:4c:%02x:%02x:%02x\n",
+					(id[0]^id[1]^id[2]^id[3]^id[4])+0x5,
+					(id[5]^id[6]^id[7]^id[8]^id[9])+0x3,
+					(id[10]^id[11]^id[12]^id[13]^id[14]^id[15])+0x6);
+	printk(KERN_INFO "BT HW address=%s\n", bdaddr);
+}
+
+/*static void bt_export_bd_address(void)
+{
 	unsigned char cTemp[6];
 
 	memcpy(cTemp, get_bt_bd_ram(), 6);
 	sprintf(bdaddr, "%02x:%02x:%02x:%02x:%02x:%02x",
 		cTemp[0], cTemp[1], cTemp[2], cTemp[3], cTemp[4], cTemp[5]);
 	printk(KERN_INFO "BT HW address=%s\n", bdaddr);
-}
+}*/
 
 module_param_string(bdaddr, bdaddr, sizeof(bdaddr), S_IWUSR | S_IRUGO);
 MODULE_PARM_DESC(bdaddr, "bluetooth address");
@@ -830,13 +843,26 @@ extern unsigned char *get_bt_bd_ram(void);
 
 static void bt_export_bd_address(void)
 {
+	int i;
+	uint8_t id[16];
+	for (i=0; i<16; i++)
+		id[i] = readb(MSM_SHARED_RAM_BASE + 0xfc060 + i);
+	sprintf(bdaddress, "00:90:4c:%02x:%02x:%02x\n",
+					(id[0]^id[1]^id[2]^id[3]^id[4])+0x5,
+					(id[5]^id[6]^id[7]^id[8]^id[9])+0x3,
+					(id[10]^id[11]^id[12]^id[13]^id[14]^id[15])+0x6);
+	printk(KERN_INFO "YoYo--BD_ADDRESS=%s\n", bdaddress);
+}
+
+/*static void bt_export_bd_address(void)
+{
 	unsigned char cTemp[6];
 
 	memcpy(cTemp, get_bt_bd_ram(), 6);
 	sprintf(bdaddress, "%02x:%02x:%02x:%02x:%02x:%02x",
 		cTemp[0], cTemp[1], cTemp[2], cTemp[3], cTemp[4], cTemp[5]);
 	printk(KERN_INFO "YoYo--BD_ADDRESS=%s\n", bdaddress);
-}
+}*/
 
 module_param_string(bdaddress, bdaddress, sizeof(bdaddress), S_IWUSR | S_IRUGO);
 MODULE_PARM_DESC(bdaddress, "BT MAC ADDRESS");

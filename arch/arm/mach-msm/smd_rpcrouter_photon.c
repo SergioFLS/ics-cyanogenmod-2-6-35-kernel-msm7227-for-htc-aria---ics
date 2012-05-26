@@ -798,8 +798,8 @@ int msm_rpc_write(struct msm_rpc_endpoint *ept, void *buffer, int count)
 					be32_to_cpu(ept->dst_vers),
 					be32_to_cpu(rq->vers))) {
 #else
-		if (ept->dst_vers != rq->vers)
-			rq->vers = ept->dst_vers; //cardsharing-x fix
+		//if (ept->dst_vers != rq->vers)
+		//	rq->vers = ept->dst_vers; //cardsharing-x fix
 		if (ept->dst_prog != rq->prog || ept->dst_vers != rq->vers) {
 #endif
 			printk(KERN_ERR
