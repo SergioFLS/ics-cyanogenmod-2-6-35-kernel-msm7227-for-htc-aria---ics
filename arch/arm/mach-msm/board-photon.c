@@ -1063,8 +1063,8 @@ static void __init photon_fixup(struct machine_desc *desc, struct tag *tags,
 	printk(KERN_INFO "fixup: bank1 start=%08lx, node=%08x, size=%08lx\n", mi->bank[1].start, mi->bank[1].node, mi->bank[1].size);
 }
 
-int __init htc_fb_console_init(void);
-int __init ram_console_early_init(void);
+//int __init htc_fb_console_init(void);
+//int __init ram_console_early_init(void);
 
 static void __init photon_map_io(void)
 {

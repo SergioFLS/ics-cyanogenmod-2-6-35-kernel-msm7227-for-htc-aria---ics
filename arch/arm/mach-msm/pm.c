@@ -49,7 +49,11 @@
 #include <linux/wakelock.h>
 #endif
 
+#if defined(CONFIG_MACH_PHOTON)
+#define DRAINFIX	0
+#else
 #define DRAINFIX	1
+#endif
 
 enum {
 	MSM_PM_DEBUG_SUSPEND = 1U << 0,
@@ -382,6 +386,12 @@ static int msm_sleep(int sleep_mode, uint32_t sleep_delay, int from_idle)
 	int ret;
 	int rv = -EINTR;
 	bool invalid_inital_state = false;
+
+//Fix for power suspend
+#if defined(CONFIG_MACH_PHOTON)
+	if(sleep_mode<2)
+			sleep_mode=2;
+#endif
 
 	if (board_mfg_mode() == 4) /*power test mode*/
 		gpio_set_diag_gpio_table(
