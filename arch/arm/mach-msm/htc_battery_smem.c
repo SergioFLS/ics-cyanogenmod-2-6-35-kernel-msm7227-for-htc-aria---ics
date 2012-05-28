@@ -3,6 +3,7 @@
  * also based on Xandroid algorithm and HTCLeo (thank you guys!)
  *
  * updated by r0bin and photon community (2011)
+ * updated by Munjeni (2012)
  * Copyright (C) 2008 HTC Corporation.
  * Copyright (C) 2008 Google, Inc.
  *
@@ -699,13 +700,26 @@ static void htc_battery_level_compute(struct battery_info_reply *buffer) {
 		result = 0;
 	}
 	/* allocate raw result */
-	buffer->level = result;
+	//buffer->level = result;
 
-	/* general rule: dont allow variations more than 2% per sample */
-	if ((result > (old_level + 2)) && (result < 98) && (old_level > 0)) {
-		buffer->level = old_level + 2;
+	/*
+	 * Munjeni: because we have not accurate battery level,
+	 * and becouse this battery driver is very complicated,
+	 * lets add an algorithm for swapping levels, now final level will be bassed
+	 * on: (one level bassed on battery voltage + (curent level * 4)) / 5
+	 * Photon battery: min voltage is 3400mV and max voltage is 4200mV
+	 * 4200 - 3400 = 800 mV = 100% => 1% = 8 mV
+	 * level_bassed_on_voltage=(current_voltage-min_voltage)/8
+	 * So simple adding one level bassed on voltage to level * 4 and result is: (swap all levels / 5)
+	 * I think battery level will be more acourate.
+	 */
+	buffer->level = ((result*4) + ((volt-3400)/8)) / 5;
+
+	/* general rule: dont allow variations more than 1% per sample */
+	if ((result > (old_level + 2)) && (result < 99) && (old_level > 0)) {
+		buffer->level = old_level + 1;
 	} else if (result < (old_level - 2) && (old_level > 0)) {
-		buffer->level = old_level - 2;
+		buffer->level = old_level - 1;
 	}
 
 	/* general rule: if result is below 5%, do like WinMo and advise Android to switch off! */
