@@ -1042,7 +1042,7 @@ static void __init photon_init(void)
 
 	photon_init_keypad();
 	
-	msm_hsusb_set_vbus_state(1);
+	//msm_hsusb_set_vbus_state(1);
 }
 
 static void __init photon_fixup(struct machine_desc *desc, struct tag *tags,

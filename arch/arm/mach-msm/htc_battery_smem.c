@@ -2,8 +2,8 @@
  * Based on: htc_battery.c by HTC and Google
  * also based on Xandroid algorithm and HTCLeo (thank you guys!)
  *
- * updated by r0bin and photon community (2011)
  * updated by Munjeni (2012)
+ * updated by r0bin and photon community (2011)
  * Copyright (C) 2008 HTC Corporation.
  * Copyright (C) 2008 Google, Inc.
  *
@@ -45,16 +45,12 @@ static int batt_vref = 1238;
 static int batt_vref_half = 615;
 static int g_usb_online;
 
-#define NO_BATTERY_COMPUTATION_IN_SUSPEND_MODE 0
 #define TRACE_BATT 0
 #define ROBIN_LOG 0
 #define HTC_BATTERY_BATTLOGGER 0
+#define SWAP_AN_LEVEL_BASSED_ON_VOLTAGE 1
 
 #define MODULE_NAME "htc_battery"
- 
-#if NO_BATTERY_COMPUTATION_IN_SUSPEND_MODE
-DECLARE_COMPLETION(batt_thread_can_start);
-#endif
 
 enum {
 	DEBUG_BATT	= 1<<0,
@@ -311,13 +307,10 @@ static int get_vbus_state(void)
 		return 0;
 }
 
-int usb_disabled_now;
 void notify_cable_status(int status) {
 	printk("%s, VBUS IRQ triggered, VBUS=%d)\n", __func__,status);
 	/* activate VBUS for usb driver */
 	msm_hsusb_set_vbus_state(status);
-	if (status)
-		usb_disabled_now = 0;
 	/* queue work to avoid blocking irq */
 	queue_work(g_vbus_notifier_work_queue, &g_vbus_notifier_work);	
 }
@@ -524,17 +517,6 @@ int htc_cable_status_update(const char *sfrom) {
 
 	htc_battery_set_charging(status);
 
-	/* r0bin: fix battery drain issue & keep usb connection stable */
-	/* cardsharing-x: fix double call bug! */
-	if (!((source==CHARGER_USB) || (source==CHARGER_AC))) {
-		if (!usb_disabled_now)
-			usb_disabled_now = 1;
-	}
-	if (usb_disabled_now == 1) {
-		msm_hsusb_set_vbus_state(0);
-		usb_disabled_now = 2;
-	}
-
 	if (source == CHARGER_USB || source == CHARGER_AC ) {
 		wake_lock(&vbus_wake_lock);
 	} else if (last_source != source) {
@@ -544,6 +526,8 @@ int htc_cable_status_update(const char *sfrom) {
 		wake_lock_timeout(&vbus_wake_lock, HZ);
 	} else {
 		wake_unlock(&vbus_wake_lock);
+		if (get_vbus_state())
+			msm_hsusb_set_vbus_state(0);
 	}
 
 	/* make sure that we only change the powersupply state if we really have to */
@@ -699,22 +683,24 @@ static void htc_battery_level_compute(struct battery_info_reply *buffer) {
 	} else if (result < 0) {
 		result = 0;
 	}
-	/* allocate raw result */
-	//buffer->level = result;
 
 	/*
 	 * Munjeni: because we have not accurate battery level,
 	 * and becouse this battery driver is very complicated,
 	 * lets add an algorithm for swapping levels, now final level will be bassed
-	 * on: (one level bassed on battery voltage + (curent level * 4)) / 5
-	 * Photon battery: min voltage is 3400mV and max voltage is 4200mV
+	 * on: (one level bassed on battery voltage + (curent level * 5)) / 6
+	 * Photon battery: min voltage is 3300mV and max voltage is 4200mV
 	 * 4200 - 3400 = 800 mV = 100% => 1% = 8 mV
-	 * level_bassed_on_voltage=(current_voltage-min_voltage)/8
-	 * So simple adding one level bassed on voltage to level * 4 and result is: (swap all levels / 5)
+	 * level_bassed_on_voltage=((Vcurrent - Vmin)*100%)/(Vmax - Vmin)
+	 * So simple adding one level bassed on voltage to level * 5 and result is: (swap all levels / 6)
 	 * I think battery level will be more acourate.
 	 */
-	buffer->level = ((result*4) + ((volt-3400)/8)) / 5;
-
+#if SWAP_AN_LEVEL_BASSED_ON_VOLTAGE
+	buffer->level = ((result*5) + (((volt-batt_param->cri_volt_threshold)*100) / (4200-batt_param->cri_volt_threshold))) / 6;
+#else
+	/* allocate raw result */
+	buffer->level = result;
+#endif
 	/* general rule: dont allow variations more than 1% per sample */
 	if ((result > (old_level + 2)) && (result < 99) && (old_level > 0)) {
 		buffer->level = old_level + 1;
@@ -723,7 +709,7 @@ static void htc_battery_level_compute(struct battery_info_reply *buffer) {
 	}
 
 	/* general rule: if result is below 5%, do like WinMo and advise Android to switch off! */
-	if(buffer->level <= 5)
+	if(buffer->level <= 3)
 		buffer->level = 0;
 
 	/* backup */
@@ -1111,31 +1097,6 @@ static int htc_battery_thread(void *data) {
 		else
 			msleep(1000);
 
-#if NO_BATTERY_COMPUTATION_IN_SUSPEND_MODE
-		/* dont work in sleep mode! */
-		if (bat_suspended) {
-			/* update the batt level with the samples we have */
-			if(tab_index >= 1) {
-				int smooth_lvl = 0;
-				/* compute average level */
-				for(i=0;i<tab_index;i++)
-					smooth_lvl += percent_tab[i];		
-				smooth_lvl = smooth_lvl / tab_index;
-				printk("%s, %d samples only, average percentage=%d\n",
-						 __func__,tab_index,smooth_lvl);
-				/* smooth batt level */
-				htc_batt_info.rep.level = smooth_lvl;
-				htc_batt_info.update_time = jiffies;
-				//update power supply class
-				power_supply_changed(&htc_power_supplies[CHARGER_BATTERY]);
-			}
-			tab_index = 0;
-			//put on sleep, waiting for signal to wake up
-			printk("%s, put batt thread on sleep!\n",__func__);
-			wait_for_completion(&batt_thread_can_start);
-			printk("%s, batt_thread_can_start!\n",__func__);
-		} else {
-#endif
 		/* read raw SMEM values */
   		htc_get_batt_smem_info(&htc_batt_data_smooth);
   		mutex_unlock(&htc_batt_info.lock);
@@ -1179,9 +1140,6 @@ static int htc_battery_thread(void *data) {
 		//report batt info changed every 5 samples (update temp, volt, current)
 		if(tab_index%5 == 0)
 			power_supply_changed(&htc_power_supplies[CHARGER_BATTERY]);
-#if NO_BATTERY_COMPUTATION_IN_SUSPEND_MODE
-		}
-#endif
 	}
 
 	return 0;
@@ -1249,9 +1207,6 @@ static int htc_battery_probe(struct platform_device *pdev)
 
 #if CONFIG_PM
 static int htc_battery_suspend(struct platform_device* device, pm_message_t mesg) {
-#if NO_BATTERY_COMPUTATION_IN_SUSPEND_MODE
-	INIT_COMPLETION(batt_thread_can_start);
-#endif
 	bat_suspended = 1;
 	return 0;
 }
@@ -1259,10 +1214,7 @@ static int htc_battery_suspend(struct platform_device* device, pm_message_t mesg
 static int htc_battery_resume(struct platform_device* device) {
 	bat_suspended = 0;
 	maf_clear();
-#if NO_BATTERY_COMPUTATION_IN_SUSPEND_MODE
-	/* notify ready for action */
-	complete(&batt_thread_can_start);
-#endif
+
 	return 0; 
 }
 #else
