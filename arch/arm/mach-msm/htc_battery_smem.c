@@ -704,7 +704,7 @@ static void htc_battery_level_compute(struct battery_info_reply *buffer) {
 	 */
 #if SWAP_AN_LEVEL_BASSED_ON_VOLTAGE
 	buffer->level = ((result*5) + (((volt-batt_param->cri_volt_threshold)*100) / (4200-batt_param->cri_volt_threshold))) / 6;
-	if (volt == 4200)
+	if (volt == 4150)
 		buffer->level = 100;
 #else
 	/* allocate raw result */
