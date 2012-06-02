@@ -49,6 +49,7 @@ static int g_usb_online;
 #define ROBIN_LOG 0
 #define HTC_BATTERY_BATTLOGGER 0
 #define SWAP_AN_LEVEL_BASSED_ON_VOLTAGE 1
+#define ALLWAYS_FAST_CHARGING 1
 
 #define MODULE_NAME "htc_battery"
 
@@ -402,9 +403,15 @@ static int battery_charging_ctrl(batt_ctl_t ctl) {
 	case ENABLE_SLOW_CHG:
 		if(debug_mask&DEBUG_CABLE)
 			BATT("CTRL charger ON (SLOW)\n");
+#if ALLWAYS_FAST_CHARGING
+		result = gpio_direction_output(htc_batt_info.resources->gpio_charger_fast_dis, 0);
+		result = gpio_direction_output(htc_batt_info.resources->gpio_charger_fast_en, 1);
+		result = gpio_direction_output(htc_batt_info.resources->gpio_charger_enable, 0);
+#else
 		result = gpio_direction_output(htc_batt_info.resources->gpio_charger_fast_dis, 1);
 		result = gpio_direction_output(htc_batt_info.resources->gpio_charger_fast_en, 0);
 		result = gpio_direction_output(htc_batt_info.resources->gpio_charger_enable, 0);
+#endif
 		break;
 	case ENABLE_FAST_CHG:
 		if(debug_mask&DEBUG_CABLE)
@@ -697,6 +704,8 @@ static void htc_battery_level_compute(struct battery_info_reply *buffer) {
 	 */
 #if SWAP_AN_LEVEL_BASSED_ON_VOLTAGE
 	buffer->level = ((result*5) + (((volt-batt_param->cri_volt_threshold)*100) / (4200-batt_param->cri_volt_threshold))) / 6;
+	if (volt == 4200)
+		buffer->level = 100;
 #else
 	/* allocate raw result */
 	buffer->level = result;
