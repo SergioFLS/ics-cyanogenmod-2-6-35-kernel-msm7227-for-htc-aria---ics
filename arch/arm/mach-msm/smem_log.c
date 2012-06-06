@@ -76,7 +76,7 @@
 #include "smd_private.h"
 
 #define DEBUG
-#undef DEBUG
+//#undef DEBUG
 
 #ifdef DEBUG
 #define D_DUMP_BUFFER(prestr, cnt, buf) \
@@ -1336,7 +1336,7 @@ static ssize_t smem_log_write(struct file *fp, const char __user *buf,
 	}
 
 	D(KERN_ERR "%s: ", __func__);
-	D_DUMP_BUFFER("We got", len, locbuf);
+	D_DUMP_BUFFER("We got", strlen(locbuf), locbuf);
 
 	running = locbuf;
 
