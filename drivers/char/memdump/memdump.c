@@ -12,7 +12,7 @@
 static ssize_t memdump_read(struct file *file, char __user *buf, size_t count, loff_t *ppos);
 static ssize_t memdump_write(struct file *file, const char __user *buf, size_t count, loff_t *ppos);
 static loff_t memdump_lseek(struct file *file,loff_t offset, int origin );
-static struct class_simple *memdump_class;
+//static struct class_simple *memdump_class;
 
 unsigned long ofs=0;
 
@@ -20,11 +20,11 @@ static struct file_operations memdump_ops = {
 	.owner		= THIS_MODULE,
 	.read		= memdump_read,
 	.write		= memdump_write,
-	.llseek		= memdump_lseek
+	.llseek 	= memdump_lseek
 };
 
 static loff_t memdump_lseek(struct file *file,loff_t offset, int origin ) {
-	printk("memdump: seek %d %d\n", offset, origin);
+	printk("memdump: seek %x %x\n", (int)offset, (int)origin);
 	ofs=offset;
 	return offset;
 }
@@ -41,11 +41,11 @@ static ssize_t memdump_read(struct file *file, char __user *buf, size_t count, l
 {
 	unsigned long p_a = *ppos+ofs;
 	void *mapped_mem = ioremap(p_a, count);
+	char mbuf[count];
 	if (!mapped_mem) {
 		return -EINVAL;
 	}
 	printk("mapped %08lx to %p\n", p_a, mapped_mem);
-	char mbuf[count];
 	copy_words(mapped_mem, (u_int32_t*)mbuf, count/4);
 	iounmap(mapped_mem);
 	if (copy_to_user(buf, mbuf, (unsigned long)count)) {
@@ -58,11 +58,11 @@ static ssize_t memdump_read(struct file *file, char __user *buf, size_t count, l
 static ssize_t memdump_write(struct file *file, const char __user *buf, size_t count, loff_t *ppos)
 {
 	char mbuf[count];
+	unsigned long p_a = *ppos;
+	void *mapped_mem = ioremap(p_a, count);
 	if (copy_from_user(mbuf, buf, (unsigned long)count)) {
 		return -EFAULT;
 	}
-	unsigned long p_a = *ppos;
-	void *mapped_mem = ioremap(p_a, count);
 	if (!mapped_mem) {
 		return -EINVAL;
 	}
@@ -73,6 +73,7 @@ static ssize_t memdump_write(struct file *file, const char __user *buf, size_t c
 	return count;
 }
 
+/*
 void msm_nand_hack_test(void)
 {
 	unsigned *pa;
@@ -108,6 +109,7 @@ void msm_nand_hack_test(void)
 	pa=ioremap(0xA0A00010, 4096);	pa[0]=0x00000001;	iounmap(pa);
 	pa=ioremap(0xA0A00000, 4096);	pa[0]=0x00000034;	iounmap(pa);
 }
+*/
 
 static int __init memdump_init(void)
 {
@@ -123,7 +125,7 @@ static int __init memdump_init(void)
 
 	// removing modem memory protection
 	pa=ioremap(0xA8240000, 4096);
-	printk("Reseting 0xA8240800 (%X) MPU\n", pa);
+	printk("Reseting 0xA8240800 (%X) MPU\n", (int)pa);
 	if (!pa) {
 		printk("unable to realloc 0xA824000");
 		return -EBUSY;
@@ -133,7 +135,7 @@ static int __init memdump_init(void)
 	iounmap(pa);
 
 	pa=ioremap(0xA8250000, 4096);
-	printk("Reseting 0xA8250800 (%X) MPU\n", pa);
+	printk("Reseting 0xA8250800 (%X) MPU\n", (int)pa);
 	if (!pa) {
 		printk("unable to realloc 0xA825000");
 		return -EBUSY;
@@ -142,18 +144,18 @@ static int __init memdump_init(void)
  	pa[0x200]=0;
  	iounmap(pa);
 
-	pa=ioremap(0xA0B00000, 4096);
-	printk("Reseting 0xA0B00000 (%X) MAND MPU\n", pa);
+	pa=ioremap(0xA0B00000, 0x2000);
+	printk("Reseting 0xA0B00000 (%X) MAND MPU\n", (int)pa);
 	if (!pa) {
 		printk("unable to realloc 0xA0B00000");
 		return -EBUSY;
 	}
 
-	pa[0]=0;
+	pa[0x2000]=0;
 	iounmap(pa);
 
 	pa=ioremap(0xA0A00000, 4096);
-	printk("Nand Config from 0xA0A00000 (%X)\n", pa);
+	printk("Nand Config from 0xA0A00000 (%X)\n", (int)pa);
 	if (!pa) {
 		printk("unable to realloc 0xA825000");
 		return -EBUSY;
@@ -166,7 +168,7 @@ static int __init memdump_init(void)
 
 	iounmap(pa);
 
-	msm_nand_hack_test();
+	//msm_nand_hack_test();
 
 	return 0;
 }
