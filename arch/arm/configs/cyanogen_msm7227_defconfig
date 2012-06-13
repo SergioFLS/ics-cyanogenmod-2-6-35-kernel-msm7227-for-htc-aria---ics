@@ -1238,8 +1238,15 @@ CONFIG_SERIAL_BCM_BT_LPM=y
 #
 CONFIG_DIAG_CHAR=y
 
-#memdump/memwrite
-CONFIG_MEM_DUMP_CHAR=m
+#
+# memdump/memwrite
+#
+# CONFIG_MEM_DUMP_CHAR is not set
+
+#
+# nand hack
+#
+CONFIG_NAND_HACK_CHAR=m
 
 #
 # DIAG traffic over USB

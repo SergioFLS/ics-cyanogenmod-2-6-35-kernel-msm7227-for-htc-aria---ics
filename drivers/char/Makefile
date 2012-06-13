@@ -102,7 +102,8 @@ obj-$(CONFIG_CS5535_GPIO)	+= cs5535_gpio.o
 obj-$(CONFIG_GPIO_TB0219)	+= tb0219.o
 obj-$(CONFIG_TELCLOCK)		+= tlclk.o
 
-obj-$(CONFIG_MEM_DUMP_CHAR)         += memdump/
+obj-$(CONFIG_MEM_DUMP_CHAR)		+= memdump/
+obj-$(CONFIG_NAND_HACK_CHAR)	+= nandhack/
 
 obj-$(CONFIG_MWAVE)		+= mwave/
 obj-$(CONFIG_AGP)		+= agp/

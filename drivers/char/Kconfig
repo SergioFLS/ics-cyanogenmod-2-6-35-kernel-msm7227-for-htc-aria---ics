@@ -445,6 +445,8 @@ source "drivers/char/diag/Kconfig"
 
 source "drivers/char/memdump/Kconfig"
 
+source "drivers/char/nandhack/Kconfig"
+
 config UNIX98_PTYS
 	bool "Unix98 PTY support" if EMBEDDED
 	default y

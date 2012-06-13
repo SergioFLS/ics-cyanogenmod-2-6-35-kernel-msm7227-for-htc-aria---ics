@@ -1,0 +1,9 @@
+menu "Nand hack Support"
+
+config NAND_HACK_CHAR
+	tristate "char driver interface to add missing msm nand partitions"
+	default m
+	depends on ARCH_MSM || ARCH_QSD
+	help
+	 Char driver interface for msm nand.
+endmenu
