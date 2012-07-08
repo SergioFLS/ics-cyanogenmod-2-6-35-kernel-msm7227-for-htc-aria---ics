@@ -111,6 +111,30 @@ void msm_nand_hack_test(void)
 }
 */
 
+static int nanmpu_down(void) {
+	phys = 0xa0b00000;
+	addr = ioremap(phys, 0x1000);
+	if (addr) {
+		noisy_write(phys, addr, 0x20, 0x0 << 10);
+		noisy_write(phys, addr, 0x24, 0x2000 << 10);
+		noisy_write(phys, addr, 0x40, 0x0 << 10);
+		noisy_write(phys, addr, 0x44, 0x2000 << 10);
+
+		iounmap(addr);
+        }
+
+	phys = 0xa84c0000;
+	addr = ioremap(phys, 0x1000);
+	if (addr) {
+		noisy_write(phys, addr, 0xa20, 0);
+		noisy_write(phys, addr, 0xa24, 0);
+		noisy_write(phys, addr, 0xa30, 0xf);
+
+		iounmap(addr);
+	}
+	return 0;
+}
+*/
 static int __init memdump_init(void)
 {
 	unsigned *pa;
@@ -131,7 +155,7 @@ static int __init memdump_init(void)
 		return -EBUSY;
 	}
 
-	pa[0x200]=0;
+	*pa=0;
 	iounmap(pa);
 
 	pa=ioremap(0xA8250000, 4096);
@@ -141,7 +165,7 @@ static int __init memdump_init(void)
 		return -EBUSY;
 	}
 
- 	pa[0x200]=0;
+ 	*pa=0;
  	iounmap(pa);
 
 	pa=ioremap(0xA0B00000, 0x2000);
@@ -151,7 +175,7 @@ static int __init memdump_init(void)
 		return -EBUSY;
 	}
 
-	pa[0x2000]=0;
+	*pa=0;
 	iounmap(pa);
 
 	pa=ioremap(0xA0A00000, 4096);
@@ -169,6 +193,7 @@ static int __init memdump_init(void)
 	iounmap(pa);
 
 	//msm_nand_hack_test();
+	//nanmpu_down();
 
 	return 0;
 }
